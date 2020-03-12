@@ -1,5 +1,4 @@
 const debug = require("debug")("app:dev");
-const validateUser = require("../middleware/validateUser");
 const validatePost = require("../middleware/validatePost");
 const validateUserId = require("../middleware/validateUserId");
 const db = require("../users/userDb");
@@ -50,22 +49,86 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validatePostId, (req, res) => {
   // do your magic!
+  const postId = req.params.id;
+
+  postDb
+    .getById(postId)
+    .then(post => {
+      res.status(200).json(post);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "There was an error retrieving post data.",
+        error: err,
+        error_message: err.message
+      });
+    });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validatePostId, (req, res) => {
   // do your magic!
+  const postId = req.params.id;
+
+  postDb
+    .remove(postId)
+    .then(post => res.status(200).json(post))
+    .catch(err =>
+      res.status(500).send({
+        message: "There was an error deleting this post from the server.",
+        error: err,
+        error_message: err.message
+      })
+    );
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", validatePostId, validatePost, (req, res) => {
   // do your magic!
+  const postId = req.params.id;
+  const updatedPost = {
+    text: req.body.text
+  };
+
+  postDb
+    .update(postId, updatedPost)
+    .then(post => {
+      res.status(201).json(post);
+    })
+    .catch(err =>
+      res.status(500).send({
+        message: "There was an error updating the post in ther server.",
+        error: err,
+        error_message: err.message
+      })
+    );
 });
 
 // custom middleware
 
 function validatePostId(req, res, next) {
   // do your magic!
+  const postId = req.params.id;
+
+  postDb
+    .getById(postId)
+    .then(user => {
+      //   console.log("VALIDATEUSER:", user);
+      if (!user) {
+        res.status(400).send({ message: "Invalid user id" });
+      } else {
+        next();
+        return null;
+      }
+    })
+    .catch(error => {
+      console.log("Error: ", error.response);
+      res.status(500).send({
+        message: "Error validating post ID",
+        error: error,
+        error_message: error.response
+      });
+    });
 }
 
 module.exports = router;

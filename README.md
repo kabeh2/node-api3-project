@@ -91,9 +91,9 @@ We have provided test data for the resources.
 
 ## Stretch Goals
 
-- Add the Post Router
+- [x] Add the Post Router
 
-  - Implement all endpoints and middleware within `posts/postRouter.js`
+  - [x] Implement all endpoints and middleware within `posts/postRouter.js`
 
 - Create a React App
   - Use `create-react-app` to create an application inside the root folder, name it `client`.
